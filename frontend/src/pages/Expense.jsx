@@ -10,30 +10,43 @@ import {
   updateEntry,
   deleteEntry,
 } from "../redux/entrySlice";
-import { fetchSummaryRequest, fetchSummarySuccess, fetchSummaryFailure } from "../redux/summarySlice";
+import {
+  fetchSummaryRequest,
+  fetchSummarySuccess,
+  fetchSummaryFailure,
+} from "../redux/summarySlice";
+import Toaster from "../components/Toaster";
 
 const Expense = () => {
   const dispatch = useDispatch();
 
+
   // Access entries, loading state, and errors from Redux store
-  const { entries, isLoading, error } = useSelector((state) => state.entrySlice);
-  const { totalIncome, totalExpenses, balance} = useSelector((state) => state.summarySlice);
+  const { entries, isLoading, error } = useSelector(
+    (state) => state.entrySlice
+  );
+  const { totalIncome, totalExpenses, balance } = useSelector(
+    (state) => state.summarySlice
+  );
 
   const [editEntry, setEditEntry] = useState(null);
   const [formData, setFormData] = useState({
     description: "",
     amount: "",
-    type: "expense", 
+    type: "expense",
   });
   const [toastMessage, setToastMessage] = useState("");
 
   const getSummaryDetails = async () => {
     try {
       dispatch(fetchSummaryRequest()); // Dispatch the summary request to Redux
-      const res = await fetch("http://localhost:3000/api-v1/summary/get-summary", {
-        method: "GET",
-        credentials: "include",
-      });
+      const res = await fetch(
+        "http://localhost:3000/api-v1/summary/get-summary",
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
 
       if (res.ok) {
         const data = await res.json();
@@ -88,7 +101,19 @@ const Expense = () => {
       amount: parseFloat(formData.amount),
       type: formData.type,
     };
-
+    if (updatedData.type === "expense") {
+    
+      const currentExpenseAmount = entries.find((entry) => entry.id === editEntry)?.amount || 0;
+    
+      // Calculate the new total expenses after updating the entry
+      const newTotalExpenses = totalExpenses - currentExpenseAmount + updatedData.amount;
+    
+    
+      if (newTotalExpenses > totalIncome) {
+        setToastMessage(`Updated expenses cannot exceed the total income of $${totalIncome}`);
+        return;
+      }
+    }
     
 
     try {
@@ -122,6 +147,10 @@ const Expense = () => {
 
   // Handle deleting an expense entry
   const handleDelete = async (id) => {
+
+    
+
+
     try {
       const res = await fetch(
         `http://localhost:3000/api-v1/entry/delete-entry/${id}`,
@@ -150,7 +179,7 @@ const Expense = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle type change (expense or income)
+  
   const handleTypeChange = (e) => {
     setFormData((prev) => ({ ...prev, type: e.target.value }));
   };
@@ -164,12 +193,11 @@ const Expense = () => {
         <div className="flex items-center gap-2">
           <span className="font-semibold">Total Expense:</span>
           <span className="text-xl font-bold text-red-600">
-           {totalExpenses}
+            {totalExpenses}
           </span>
         </div>
       </div>
 
- 
       {entries.length > 0 ? (
         entries.map((entry) =>
           entry.type === "expense" ? (
@@ -191,10 +219,14 @@ const Expense = () => {
 
                   <div className="flex items-center gap-4">
                     <SlCalender />
-                    <span>{new Date(entry.createdAt).toLocaleDateString()}</span>
+                    <span>
+                      {new Date(entry.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
-                <p className="text-gray-600">{entry.description || "No description"}</p>
+                <p className="text-gray-600">
+                  {entry.description || "No description"}
+                </p>
 
                 {/* Update and Delete Buttons */}
                 <div className="flex gap-2">
@@ -262,7 +294,6 @@ const Expense = () => {
               className="p-2 border rounded-lg"
             >
               <option value="expense">Expense</option>
-              
             </select>
             <div className="flex gap-4">
               <button
@@ -284,7 +315,9 @@ const Expense = () => {
           </form>
         </div>
       )}
+          <Toaster message={toastMessage}/>
     </div>
+
   );
 };
 
