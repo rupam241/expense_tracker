@@ -11,27 +11,31 @@ export const signup = async (req, res, next) => {
   }
 
   try {
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        OR: [{ email }, { username }],
-      },
+    const result = await prisma.$transaction(async (tx) => {
+      const existingUser = await tx.user.findFirst({
+        where: {
+          OR: [{ email }, { username }],
+        },
+      });
+
+      if (existingUser) {
+        throw errorHandler(400, "Email or username already in use.");
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const newUser = await tx.user.create({
+        data: {
+          email,
+          username,
+          password: hashedPassword,
+        },
+      });
+
+      return newUser;
     });
 
-    if (existingUser) {
-      return next(errorHandler(400, "Email or username already in use."));
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        username,
-        password: hashedPassword,
-      },
-    });
-
-    const { password: _, ...userWithoutPass } = newUser;
+    const { password: _, ...userWithoutPass } = result;
 
     return res.status(201).json({
       message: "User created successfully.",
@@ -50,25 +54,29 @@ export const signin = async (req, res, next) => {
   }
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { email },
+    const result = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        throw errorHandler(400, "Invalid email or password.");
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        throw errorHandler(400, "Invalid email or password.");
+      }
+
+      return user;
     });
 
-    if (!user) {
-      return next(errorHandler(400, "Invalid email or password."));
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return next(errorHandler(400, "Invalid email or password."));
-    }
-
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: result.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
 
-    const { password: _, ...userWithoutPass } = user;
+    const { password: _, ...userWithoutPass } = result;
 
     res
       .status(200)

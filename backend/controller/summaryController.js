@@ -8,7 +8,6 @@ export const getSummary = async (req, res, next) => {
     userId,
   };
 
-
   if (period) {
     let dateRange;
     const currentDate = new Date();
@@ -34,7 +33,6 @@ export const getSummary = async (req, res, next) => {
     filters = { ...filters, createdAt: dateRange };
   }
 
-  // Include date range filters
   if (startDate) {
     filters.createdAt = { ...filters.createdAt, gte: new Date(startDate) };
   }
@@ -43,38 +41,40 @@ export const getSummary = async (req, res, next) => {
   }
 
   try {
-    const totalIncome = await prisma.entry.aggregate({
-      where: {
-        ...filters,
-        type: 'income',
-      },
-      _sum: {
-        amount: true,
-      },
-    });
+    const result = await prisma.$transaction(async (tx) => {
+      const totalIncome = await tx.entry.aggregate({
+        where: {
+          ...filters,
+          type: 'income',
+        },
+        _sum: {
+          amount: true,
+        },
+      });
 
-    const totalExpenses = await prisma.entry.aggregate({
-      where: {
-        ...filters,
-        type: 'expense',
-      },
-      _sum: {
-        amount: true,
-      },
-    });
+      const totalExpenses = await tx.entry.aggregate({
+        where: {
+          ...filters,
+          type: 'expense',
+        },
+        _sum: {
+          amount: true,
+        },
+      });
 
-   
-    const totalIncomeAmount = totalIncome._sum.amount || 0;
-    const totalExpensesAmount = totalExpenses._sum.amount || 0;
-    
-    // Calculate balance
-    const balance = totalIncomeAmount - totalExpensesAmount;
+      const totalIncomeAmount = totalIncome._sum.amount || 0;
+      const totalExpensesAmount = totalExpenses._sum.amount || 0;
+      
+      const balance = totalIncomeAmount - totalExpensesAmount;
+
+      return { totalIncomeAmount, totalExpensesAmount, balance };
+    });
 
     res.status(200).json({
-      message:"Fetch summary successful",
-      totalIncome: totalIncomeAmount,
-      totalExpenses: totalExpensesAmount,
-      balance,
+      message: "Fetch summary successful",
+      totalIncome: result.totalIncomeAmount,
+      totalExpenses: result.totalExpensesAmount,
+      balance: result.balance,
     });
   } catch (error) {
     next(error);
