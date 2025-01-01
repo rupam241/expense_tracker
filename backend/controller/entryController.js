@@ -77,7 +77,7 @@ export const getEntry = async (req, res, next) => {
 
     const totalEntries = await prisma.entry.count({ where: { userId } });
 
-    res.status(200).json({ entries, totalEntries });
+    res.status(200).json({message:"Entry fetch successfully", entries, totalEntries });
   } catch (error) {
     next(errorHandler(500, "Error fetching entries"));
   }

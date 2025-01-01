@@ -71,6 +71,7 @@ export const getSummary = async (req, res, next) => {
     const balance = totalIncomeAmount - totalExpensesAmount;
 
     res.status(200).json({
+      message:"Fetch summary successful",
       totalIncome: totalIncomeAmount,
       totalExpenses: totalExpensesAmount,
       balance,

@@ -10,21 +10,51 @@ import {
   updateEntry,
   deleteEntry,
 } from "../redux/entrySlice";
+import { fetchSummaryRequest, fetchSummarySuccess, fetchSummaryFailure } from "../redux/summarySlice";
 
 const Expense = () => {
   const dispatch = useDispatch();
 
   // Access entries, loading state, and errors from Redux store
   const { entries, isLoading, error } = useSelector((state) => state.entrySlice);
+  const { totalIncome, totalExpenses, balance} = useSelector((state) => state.summarySlice);
 
   const [editEntry, setEditEntry] = useState(null);
   const [formData, setFormData] = useState({
     description: "",
     amount: "",
-    type: "expense", // Default to "expense"
+    type: "expense", 
   });
+  const [toastMessage, setToastMessage] = useState("");
 
-  // Fetch expense entries on component mount
+  const getSummaryDetails = async () => {
+    try {
+      dispatch(fetchSummaryRequest()); // Dispatch the summary request to Redux
+      const res = await fetch("http://localhost:3000/api-v1/summary/get-summary", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        console.log(data);
+        dispatch(fetchSummarySuccess(data)); // Dispatch summary success with data
+        setToastMessage(data.message);
+      } else {
+        dispatch(fetchSummaryFailure("Failed to fetch summary details"));
+        setToastMessage("Failed to fetch summary details");
+      }
+    } catch (error) {
+      console.error(error);
+      dispatch(fetchSummaryFailure("Error fetching summary details"));
+      setToastMessage("Error fetching summary details");
+    }
+  };
+
+  useEffect(() => {
+    getSummaryDetails();
+  }, []);
+
   useEffect(() => {
     const fetchEntries = async () => {
       dispatch(fetchEntriesRequest()); // Dispatch the request to start loading
@@ -41,10 +71,10 @@ const Expense = () => {
           const data = await res.json();
           dispatch(fetchEntriesSuccess(data.entries)); // Dispatch success with data
         } else {
-          dispatch(fetchEntriesFailure("Failed to fetch expense entries")); // Dispatch failure if there's an issue
+          dispatch(fetchEntriesFailure("Failed to fetch expense entries"));
         }
       } catch (error) {
-        dispatch(fetchEntriesFailure("Error fetching expense entries")); // Dispatch failure in case of error
+        dispatch(fetchEntriesFailure("Error fetching expense entries"));
       }
     };
 
@@ -59,6 +89,8 @@ const Expense = () => {
       type: formData.type,
     };
 
+    
+
     try {
       const res = await fetch(
         `http://localhost:3000/api-v1/entry/update-entry/${editEntry}`,
@@ -71,14 +103,11 @@ const Expense = () => {
           credentials: "include",
         }
       );
-      
 
       if (res.ok) {
-        const data=await res.json()
+        const data = await res.json();
         console.log(data);
-        
         dispatch(updateEntry({ id: editEntry, ...updatedData }));
-      
         setEditEntry(null);
         setFormData({ description: "", amount: "", type: "expense" }); // Reset form fields
       } else {
@@ -88,6 +117,7 @@ const Expense = () => {
       console.error(error);
       alert("Error updating expense entry");
     }
+    getSummaryDetails(); // Fetch updated summary after update
   };
 
   // Handle deleting an expense entry
@@ -102,7 +132,8 @@ const Expense = () => {
       );
 
       if (res.ok) {
-        dispatch(deleteEntry({ id })); // Dispatch deleteEntry action to Redux
+        dispatch(deleteEntry({ id }));
+        // Fetch updated summary after delete
       } else {
         alert("Failed to delete expense entry");
       }
@@ -110,6 +141,7 @@ const Expense = () => {
       console.error(error);
       alert("Error deleting expense entry");
     }
+    getSummaryDetails();
   };
 
   // Handle form input changes
@@ -127,20 +159,17 @@ const Expense = () => {
     <div className="py-4 px-3 flex flex-col gap-6">
       <h1 className="text-2xl font-medium font-serif">Expenses</h1>
 
-      {/* Displaying total expenses */}
+      {/* Displaying Total Expenses */}
       <div className="w-full bg-white-200 shadow-md p-5 flex justify-center items-center rounded-lg">
         <div className="flex items-center gap-2">
           <span className="font-semibold">Total Expense:</span>
           <span className="text-xl font-bold text-red-600">
-            ${entries
-              .filter((entry) => entry.type === "expense")
-              .reduce((acc, entry) => acc + entry.amount, 0)
-              .toFixed(2)}
+           {totalExpenses}
           </span>
         </div>
       </div>
 
-      {/* Displaying entries */}
+ 
       {entries.length > 0 ? (
         entries.map((entry) =>
           entry.type === "expense" ? (
@@ -233,7 +262,7 @@ const Expense = () => {
               className="p-2 border rounded-lg"
             >
               <option value="expense">Expense</option>
-              <option value="income">Income</option>
+              
             </select>
             <div className="flex gap-4">
               <button

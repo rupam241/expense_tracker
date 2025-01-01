@@ -6,31 +6,61 @@ import {
   fetchEntriesRequest,
   fetchEntriesSuccess,
   fetchEntriesFailure,
-  addEntry,
   updateEntry,
   deleteEntry,
-} from "../redux/entrySlice"; // Assuming entrySlice actions are imported
+} from "../redux/entrySlice"; 
+import Toaster from "../components/Toaster";
+import { fetchSummaryFailure, fetchSummaryRequest,fetchSummarySuccess } from "../redux/summarySlice";
 
 const Income = () => {
   const dispatch = useDispatch();
+  const [message, setToastMessage] = useState(null);
+  
+  const { entries, error } = useSelector((state) => state.entrySlice);
 
-  // Access entries and financial summary from Redux store
-  const { entries, isLoading, error } = useSelector((state) => state.entrySlice);
-  const totalIncome = entries
-    .filter((entry) => entry.type === "income")
-    .reduce((acc, entry) => acc + entry.amount, 0);
+  const { totalIncome, totalExpenses, balance } = useSelector((state)=>state.summarySlice)
 
   const [editEntry, setEditEntry] = useState(null);
   const [formData, setFormData] = useState({
     description: "",
     amount: "",
-    type: "income", // Default to "income"
+    type: "income",
   });
 
-  // Fetch income entries on mount
+
+  const getSummaryDetails=async()=>{
+    try {
+      dispatch(fetchSummaryRequest())
+      const res=await fetch('http://localhost:3000/api-v1/summary/get-summary',{
+        method:'GET',
+      credentials:'include'
+      })
+      if(res.ok){
+        const data=await res.json()
+        console.log(data);
+        dispatch(fetchSummarySuccess(data))
+        setToastMessage(data.message)
+        
+        
+      }
+      else{
+        dispatch(fetchSummaryFailure("Failed to update summary details"))
+      }
+
+
+    } catch (error) {
+
+
+      
+    }
+  }
+  useEffect(()=>{
+    getSummaryDetails()
+  },[])
+
   useEffect(() => {
     const fetchEntries = async () => {
-      dispatch(fetchEntriesRequest()); // Dispatch request action to indicate loading
+      dispatch(fetchEntriesRequest()); 
       try {
         const res = await fetch(
           "http://localhost:3000/api-v1/entry/get-entry?type=income",
@@ -42,21 +72,31 @@ const Income = () => {
 
         if (res.ok) {
           const data = await res.json();
-          dispatch(fetchEntriesSuccess(data.entries)); // Dispatch success action with fetched data
+         
+          
+          dispatch(fetchEntriesSuccess(data.entries));
+          setToastMessage(data.message || "Entries loaded successfully");
         } else {
-          dispatch(fetchEntriesFailure("Failed to fetch income entries")); // Dispatch failure action
+          dispatch(fetchEntriesFailure("Failed to fetch income entries"));
+          setToastMessage("Failed to load income entries");
         }
       } catch (error) {
-        dispatch(fetchEntriesFailure("Error fetching income entries")); // Dispatch failure action
+        dispatch(fetchEntriesFailure("Error fetching income entries"));
+        setToastMessage("Error fetching income entries");
       }
     };
 
     fetchEntries();
   }, [dispatch]);
 
-  
-  // Handle update income
+
+
   const handleUpdate = async () => {
+    if (!formData.description || isNaN(formData.amount) || formData.amount <= 0) {
+      setToastMessage("Please provide a valid description and amount");
+      return;
+    }
+
     const updatedData = {
       description: formData.description,
       amount: parseFloat(formData.amount),
@@ -73,22 +113,23 @@ const Income = () => {
         credentials: "include",
       });
 
+      const data=await res.json()
+
       if (res.ok) {
-        dispatch(updateEntry({ id: editEntry, ...updatedData })); 
-      
-        
+        dispatch(updateEntry({ id: editEntry, ...updatedData }));
+        setToastMessage(data.message);
         setEditEntry(null);
-        setFormData({ description: "", amount: "", type: "income" }); // Reset form
+        setFormData({ description: "", amount: "", type: "income" });
       } else {
         throw new Error("Failed to update entry");
       }
     } catch (error) {
       console.error(error);
-      alert("Error updating income entry");
+      setToastMessage("Error updating income entry");
     }
+    getSummaryDetails()
   };
 
-  // Handle delete income
   const handleDelete = async (id) => {
     try {
       const res = await fetch(`http://localhost:3000/api-v1/entry/delete-entry/${id}`, {
@@ -97,23 +138,23 @@ const Income = () => {
       });
 
       if (res.ok) {
-        dispatch(deleteEntry({ id })); 
+        dispatch(deleteEntry({ id }));
+        setToastMessage("Entry deleted successfully");
       } else {
         throw new Error("Failed to delete entry");
       }
     } catch (error) {
       console.error(error);
-      alert("Error deleting income entry");
+      setToastMessage("Error deleting income entry");
     }
+    getSummaryDetails()
   };
 
-  // Handle input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle type change (income or expense)
   const handleTypeChange = (e) => {
     setFormData((prev) => ({ ...prev, type: e.target.value }));
   };
@@ -139,35 +180,28 @@ const Income = () => {
       {/* Displaying income entries */}
       {entries.length > 0 ? (
         entries.map((entry) =>
-          entry.type === "income" ? ( // Only show income entries
+          entry.type === "income" ? (
             <div
               key={entry.id}
               className="flex gap-4 w-full shadow-md p-4 items-center bg-gray-100 rounded-lg"
             >
-              {/* Profile Image */}
               <img
                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRmCy16nhIbV3pI1qLYHMJKwbH2458oiC9EmA&s"
                 alt=""
                 className="w-12 h-12 rounded-full object-cover"
               />
-
-              {/* Entry Details */}
               <div className="flex flex-col gap-2 w-full">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="w-3 h-3 rounded-full bg-green-400 block"></span>
                     <h1 className="font-semibold text-lg">${entry.amount}</h1>
                   </div>
-
                   <div className="flex items-center gap-4">
                     <SlCalender />
                     <span>{new Date(entry.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
-
                 <p className="text-gray-600">{entry.description || "No description"}</p>
-
-                {/* Update and Delete Buttons */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -226,8 +260,6 @@ const Income = () => {
               placeholder="Amount"
               className="p-2 border rounded-lg"
             />
-            
-            {/* Type Select */}
             <select
               name="type"
               value={formData.type}
@@ -235,9 +267,8 @@ const Income = () => {
               className="p-2 border rounded-lg"
             >
               <option value="income">Income</option>
-              <option value="expense">Expense</option>
+         
             </select>
-
             <div className="flex gap-4">
               <button
                 type="submit"
@@ -258,6 +289,8 @@ const Income = () => {
           </form>
         </div>
       )}
+
+      <Toaster message={message} />
     </div>
   );
 };
