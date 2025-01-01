@@ -102,6 +102,18 @@ const Income = () => {
       amount: parseFloat(formData.amount),
       type: formData.type,
     };
+  
+     if (updatedData.type === "income") {
+    // Calculate the new total income by subtracting the current income and adding the updated one
+    const currentIncomeAmount = entries.find((entry) => entry.id === editEntry)?.amount || 0;
+    const newTotalIncome = totalIncome - currentIncomeAmount + updatedData.amount;
+
+    // Check if the updated total income is less than total expenses
+    if (newTotalIncome < totalExpenses) {
+      setToastMessage(`Updated income cannot be less than the total expenses of $${totalExpenses}`);
+      return;
+    }
+  }
 
     try {
       const res = await fetch(`http://localhost:3000/api-v1/entry/update-entry/${editEntry}`, {
@@ -131,6 +143,20 @@ const Income = () => {
   };
 
   const handleDelete = async (id) => {
+    const entryToDelete = entries.find((entry) => entry.id === id);
+    if (entryToDelete) {
+      const newTotalIncome = totalIncome - entryToDelete.amount;
+
+      // Ensure total income after deletion does not drop below total expenses
+      if (newTotalIncome < totalExpenses) {
+        setToastMessage(`Total income cannot be less than total expenses of $${totalExpenses}`);
+        return;
+      }
+    }
+
+    
+
+
     try {
       const res = await fetch(`http://localhost:3000/api-v1/entry/delete-entry/${id}`, {
         method: "DELETE",
