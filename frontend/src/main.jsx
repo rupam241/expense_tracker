@@ -15,6 +15,8 @@ import { Provider } from "react-redux";
 import store, { persistor } from './app/store.js'; 
 import PrivateRoute from "./components/Privateroute.jsx";
 import { PersistGate } from 'redux-persist/integration/react';
+import Profile from "./pages/Profile.jsx";
+import ChangePass from "./pages/ChangePass.jsx";
 
 // Define routes
 const router = createBrowserRouter([
@@ -35,7 +37,7 @@ const router = createBrowserRouter([
         element: (
           <div className="flex flex-col lg:flex-row p-4 gap-4">
           <LeftBar />
-          <RightBar />
+          <RightBar  />
         </div>
         
         ),
@@ -44,6 +46,8 @@ const router = createBrowserRouter([
           { path: "expense", element: <Expense /> }, 
           { path: "income", element: <Income /> }, 
           { path: "dashboard", element: <Dashboard /> }, 
+          { path: "profile", element: <Profile/> },
+          { path: "change-password", element: <ChangePass/> }, 
         ],
       },
     ],

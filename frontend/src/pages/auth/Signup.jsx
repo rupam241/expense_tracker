@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import Toaster from "../../components/Toaster"
+import { signInFailure, signInStart, signInSuccess } from '../../redux/userSlice';
 
 const Signup = () => {
   const[err,seterr]=useState(null)
@@ -9,6 +11,7 @@ const Signup = () => {
     email:"",
     password:""
   })
+  const[message,setMessage]=useState(null)
 
   const dispatch=useDispatch()
   const navigate=useNavigate()
@@ -25,6 +28,7 @@ const Signup = () => {
     }
 
     try {
+      dispatch(signInStart())
       const res=await fetch ('/api-v1/auth/sign-up',{
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -32,12 +36,18 @@ const Signup = () => {
       })
       if(res.ok){
         const data=await res.json()
-        console.log(data);
+        console.log(data)
+        dispatch(signInSuccess(data.data))
+        
         navigate('/signin')
         
       }
+      else{
+        const data=await res.json()
+        dispatch(signInFailure(data.message))
+      }
     } catch (error) {
-      
+      setMessage(error)
     }
 
     
@@ -103,6 +113,7 @@ const Signup = () => {
           </a>
         </p>
       </div>
+      <Toaster message={message}/>
     </div>
   );
 };

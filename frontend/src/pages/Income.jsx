@@ -39,7 +39,7 @@ const Income = () => {
         const data=await res.json()
         console.log(data);
         dispatch(fetchSummarySuccess(data))
-        setToastMessage(data.message)
+       
         
         
       }

@@ -2,13 +2,16 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { signInStart, signInFailure, signInSuccess } from '../../redux/userSlice'
+import Toaster from "../../components/Toaster"
 
 const Signin = () => {
   const [data, setData] = useState({
     email: "",
     password: ""
   })
-  const [err, setErr] = useState(""); // Declare err state for errors
+  const [err, setErr] = useState("");
+  const[message,setMessage]=useState(null)
+ 
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -21,7 +24,7 @@ const Signin = () => {
     e.preventDefault();
 
     if (!data.email || !data.password) {
-      setErr("Please fill out all fields");
+      setMessage("Please fill out all fields");
       return;
     }
 
@@ -39,12 +42,13 @@ const Signin = () => {
         navigate('/dashboard')
        
         dispatch(signInSuccess(data));
+        setMessage(data.message)
         
       } else {
-        setErr("Invalid credentials, please try again.");
+        setMessage("Invalid credentials, please try again.");
       }
     } catch (error) {
-      setErr("An error occurred, please try again later.");
+      setMessage("An error occurred, please try again later.");
       dispatch(signInFailure(error));
     }
   }
@@ -98,6 +102,7 @@ const Signin = () => {
           </p>
         </div>
       </div>
+      <Toaster message={message}/>
     </div>
   )
 }

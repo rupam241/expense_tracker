@@ -24,15 +24,17 @@ export const updateProfile = async (req, res, next) => {
       // Update user profile in the database
       const updatedUser = await tx.user.update({
         where: { id: userId },
-        data: { username, email },  // Update correct fields
+        data: { username, email },  
       });
 
       return updatedUser;
     });
 
+    const { password: _, ...userWithoutPass } = result;
+
     return res.status(200).json({
       message: "Profile updated successfully.",
-      data: result,
+      data: userWithoutPass,
     });
   } catch (error) {
     next(error);
@@ -77,10 +79,11 @@ export const changePassword = async (req, res, next) => {
 
       return updatedUser;
     });
+    const { password: _, ...userWithoutPass } = result;
 
     return res.status(200).json({
       message: "Password changed successfully.",
-      data: result,
+      data: userWithoutPass,
     });
   } catch (error) {
     next(error);
@@ -112,6 +115,7 @@ export const deleteAccount = async (req, res, next) => {
       await tx.user.delete({
         where: { id: userId },
       });
+      
 
       return { message: "Account deleted successfully." };
     });
