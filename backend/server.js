@@ -4,17 +4,25 @@ import cors from "cors";
 import routes from "./routes/index.js";
 import cookieParser from "cookie-parser";
 import prisma from "./DB/db.config.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
+// Configure environment variables
 dotenv.config();
 
+// Create Express app
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Resolve the current directory for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Enable CORS
 app.use(
     cors({
         origin: "http://localhost:5173", 
-        credentials: true, 
+        credentials: true,
     })
 );
 
@@ -26,12 +34,12 @@ app.use(cookieParser());
 // Routes
 app.use("/api-v1", routes);
 
-// 404 Route Handler
-app.use("*", (req, res) => {
-    res.status(404).json({
-        status: "404 Not Found",
-        message: "Route not found",
-    });
+// Serve static files from the React build folder
+app.use(express.static(path.join(__dirname, "client", "dist")));
+
+// Catch-all route to serve React app
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 
 // Error Handling Middleware (must come last)
@@ -45,6 +53,7 @@ app.use((err, req, res, next) => {
     });
 });
 
+// Connect to the database and start the server
 prisma.$connect()
     .then(() => {
         console.log("Database connected successfully!");
