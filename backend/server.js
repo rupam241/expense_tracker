@@ -45,7 +45,6 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Connect to Database and Start Server
 prisma.$connect()
     .then(() => {
         console.log("Database connected successfully!");
