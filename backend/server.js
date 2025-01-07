@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import routes from "./routes/index.js";
 import cookieParser from "cookie-parser";
+import prisma from "./DB/db.config.js";
 
 dotenv.config();
 
@@ -20,7 +21,7 @@ app.use(
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // Move cookieParser before routes
+app.use(cookieParser());
 
 // Routes
 app.use("/api-v1", routes);
@@ -44,7 +45,14 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Start the server
-app.listen(port, () => {
-    console.log(`Server is running on PORT ${port}`);
-});
+// Connect to Database and Start Server
+prisma.$connect()
+    .then(() => {
+        console.log("Database connected successfully!");
+        app.listen(port, () => {
+            console.log(`Server is running on PORT ${port}`);
+        });
+    })
+    .catch((err) => {
+        console.error("Database connection failed: ", err);
+    });
