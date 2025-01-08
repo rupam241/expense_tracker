@@ -21,7 +21,7 @@ const [message,setMessage]=useState(null)
   const handleSubmit = async () => {
     
     try {
-      const res = await fetch("http://localhost:3000/api-v1/user/change-password", {
+      const res = await fetch("/api-v1/user/change-password", {
         method: "PUT",
         credentials: "include",
         headers: {

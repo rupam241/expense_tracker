@@ -22,7 +22,7 @@ const IncomeExpenseChart = () => {
  
   const fetchSummary = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api-v1/summary/get-summary?period=${period}`, {
+      const response = await fetch(`/api-v1/summary/get-summary?period=${period}`, {
         method: 'GET',
         credentials: 'include',
       });

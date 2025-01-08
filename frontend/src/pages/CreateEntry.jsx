@@ -54,7 +54,7 @@ const CreateEntry = () => {
     try {
       dispatch(fetchEntriesRequest())
 
-      const res = await fetch('http://localhost:3000/api-v1/entry/create-entry', {
+      const res = await fetch('/api-v1/entry/create-entry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

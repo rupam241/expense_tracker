@@ -52,7 +52,7 @@ const handleAccountDelete = async () => {
     dispatch(updateStart());
     try {
       const res = await fetch(
-        "http://localhost:3000/api-v1/user/update-profile",
+        "/api-v1/user/update-profile",
         {
           method: "PUT",
           headers: {

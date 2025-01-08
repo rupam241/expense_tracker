@@ -41,7 +41,7 @@ const Expense = () => {
     try {
       dispatch(fetchSummaryRequest()); // Dispatch the summary request to Redux
       const res = await fetch(
-        "http://localhost:3000/api-v1/summary/get-summary",
+        "/api-v1/summary/get-summary",
         {
           method: "GET",
           credentials: "include",
@@ -73,7 +73,7 @@ const Expense = () => {
       dispatch(fetchEntriesRequest()); // Dispatch the request to start loading
       try {
         const res = await fetch(
-          "http://localhost:3000/api-v1/entry/get-entry?type=expense",
+          "/api-v1/entry/get-entry?type=expense",
           {
             method: "GET",
             credentials: "include",
@@ -153,7 +153,7 @@ const Expense = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api-v1/entry/delete-entry/${id}`,
+        `/api-v1/entry/delete-entry/${id}`,
         {
           method: "DELETE",
           credentials: "include",

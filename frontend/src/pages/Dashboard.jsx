@@ -27,7 +27,7 @@ const Dashboard = () => {
     dispatch(fetchEntriesRequest());
     try {
       const res = await fetch(
-        "http://localhost:3000/api-v1/entry/get-entry?page=1",
+        "/api-v1/entry/get-entry?page=1",
         {
           method: "GET",
           credentials: "include", // Ensure cookies are included
@@ -54,7 +54,7 @@ const Dashboard = () => {
       dispatch(fetchSummaryRequest());
       try {
         const res = await fetch(
-          "http://localhost:3000/api-v1/summary/get-summary",
+          "/api-v1/summary/get-summary",
           {
             method: "GET",
             credentials: "include", // Ensure cookies are included

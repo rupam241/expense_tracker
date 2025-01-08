@@ -31,7 +31,7 @@ const Income = () => {
   const getSummaryDetails=async()=>{
     try {
       dispatch(fetchSummaryRequest())
-      const res=await fetch('http://localhost:3000/api-v1/summary/get-summary',{
+      const res=await fetch('/api-v1/summary/get-summary',{
         method:'GET',
       credentials:'include'
       })
@@ -63,7 +63,7 @@ const Income = () => {
       dispatch(fetchEntriesRequest()); 
       try {
         const res = await fetch(
-          "http://localhost:3000/api-v1/entry/get-entry?type=income",
+          "/api-v1/entry/get-entry?type=income",
           {
             method: "GET",
             credentials: "include",
@@ -116,7 +116,7 @@ const Income = () => {
   }
 
     try {
-      const res = await fetch(`http://localhost:3000/api-v1/entry/update-entry/${editEntry}`, {
+      const res = await fetch(`/api-v1/entry/update-entry/${editEntry}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -158,7 +158,7 @@ const Income = () => {
 
 
     try {
-      const res = await fetch(`http://localhost:3000/api-v1/entry/delete-entry/${id}`, {
+      const res = await fetch(`/api-v1/entry/delete-entry/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
