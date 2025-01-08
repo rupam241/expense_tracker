@@ -73,12 +73,13 @@ const handleopen=()=>{
 
   <div className="relative flex flex-col items-center space-y-4">
     
-    <span className="text-2xl font-semibold" onClick={handleopen}>
+    <span className="text-2xl font-semibold flex flex-col items-center"  onClick={handleopen}>
       <img
         src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
         alt="Profile"
         className="w-20 h-20 rounded-full object-cover text-center cursor-pointer"
       />
+      <span className="font-bold text-sm cursor-pointer ">See the details.Click me!</span>
       
     </span>
     {open && (
