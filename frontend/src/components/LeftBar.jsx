@@ -11,6 +11,8 @@ const LeftBar = () => {
  
 const {currentuser,error}=useSelector((state)=>state.user)
 
+
+
 const[open,setOpen]=useState(false)
 
 
@@ -67,13 +69,17 @@ const handleopen=()=>{
 
   return (
     <div className="w-full sm:w-1/4 lg:w-1/5 h-auto sm:h-[92vh] bg-customPink px-6 py-8 flex flex-col items-center gap-5 overflow-hidden rounded-lg border-2">
+   
+
   <div className="relative flex flex-col items-center space-y-4">
+    
     <span className="text-2xl font-semibold" onClick={handleopen}>
       <img
         src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
         alt="Profile"
         className="w-20 h-20 rounded-full object-cover text-center cursor-pointer"
       />
+      
     </span>
     {open && (
       <div className="absolute top-full mt-2 w-48 bg-white  rounded-md shadow-lg overflow-hidden border-2">
@@ -82,7 +88,7 @@ const handleopen=()=>{
          
           <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Transactions</li>
           
-          <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Logout</li>
+          <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleSignOut} >Logout</li>
         </ul>
       </div>
     )}
