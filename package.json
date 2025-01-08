@@ -4,8 +4,9 @@
   "type": "module",
   "main": "backend/server.js",
   "scripts": {
-    "start": "node backend/server.js", 
-    "build": "cd frontend && npm install && npm run build"  
+    "start": "npm run build && npm run server", 
+    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install",
+    "server": "node backend/server.js"
   },
   "dependencies": {}
 }
