@@ -2,12 +2,10 @@
   "name": "shareassesment",
   "version": "1.0.0",
   "type": "module",
-  "main": "server.js",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js", 
-    "build": "cd frontend && npm install && npm run build && cd ../backend && npm install" 
+    "start": "node backend/server.js",
+    "build": "cd frontend && npm install && npm run build"
   },
-  "dependencies": {
-    "build": "^0.1.4"
-  }
+  "dependencies": {}
 }
