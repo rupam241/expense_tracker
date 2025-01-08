@@ -19,9 +19,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Enable CORS
+const allowedOrigins = [
+    "http://localhost:5173",
+    process.env.FRONTEND_URL,
+];
 app.use(
     cors({
-        origin: "http://localhost:5173", 
+        origin: allowedOrigins,
         credentials: true,
     })
 );
@@ -35,14 +39,14 @@ app.use(cookieParser());
 app.use("/api-v1", routes);
 
 // Serve static files from the React build folder
-app.use(express.static(path.join(__dirname, "client", "dist")));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 
 // Catch-all route to serve React app
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend/dist", "index.html"));
 });
 
-// Error Handling Middleware (must come last)
+// Error Handling Middleware
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const message = err.message || "Internal Server Error";
