@@ -85,8 +85,8 @@ const handleopen=()=>{
       <div className="absolute top-full mt-2 w-48 bg-white  rounded-md shadow-lg overflow-hidden border-2">
         <ul className="text-gray-700">
          <Link to="/profile"> <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Profile</li></Link>
-         
-          <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Transactions</li>
+         <Link to="/transactions"><li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Transactions</li></Link>
+          
           
           <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer" onClick={handleSignOut} >Logout</li>
         </ul>
