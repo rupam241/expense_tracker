@@ -44,51 +44,52 @@ const IncomeExpenseChart = () => {
   // Function to format the data for the chart
   const formatChartData = (data) => {
     if (!data) return null;
-
+  
     return {
       labels: ['Total Income', 'Total Expenses'], // X-axis categories
       datasets: [
         {
           label: 'Income',
-          data: [data.totalIncome || 0], // Fallback to 0 if data is missing
-          backgroundColor: 'rgba(0, 128, 0, 0.5)', // Green color for income bars
+          data: [data.totalIncome || 0, 0], // Map income to the first label
+          backgroundColor: 'rgba(0, 128, 0, 0.5)', // Green color
         },
         {
           label: 'Expenses',
-          data: [data.totalExpenses || 0], // Fallback to 0 if data is missing
-          backgroundColor: 'rgba(255, 0, 0, 0.5)', // Red color for expenses bars
+          data: [0, data.totalExpenses || 0], // Map expenses to the second label
+          backgroundColor: 'rgba(255, 0, 0, 0.5)', // Red color
         },
       ],
     };
   };
+  
 
 
   useEffect(() => {
-    fetchSummary(); // Fetch new data whenever the period changes
+    fetchSummary(); 
   }, [period]);
 
-  // Handle period change from dropdown
+  
   const handlePeriodChange = (event) => {
     setPeriod(event.target.value);
   };
 
-  // Dynamically adjust chart height based on screen size
+  
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
-        setChartHeight(300); // Smaller height for large screens
+        setChartHeight(300);
       } else if (window.innerWidth >= 768) {
-        setChartHeight(350); // Medium height for tablets
+        setChartHeight(350); 
       } else {
-        setChartHeight(400); // Default height for smaller screens
+        setChartHeight(400); 
       }
     };
 
-    handleResize(); // Initial resize check
-    window.addEventListener('resize', handleResize); // Add resize listener
+    handleResize(); 
+    window.addEventListener('resize', handleResize); 
 
     return () => {
-      window.removeEventListener('resize', handleResize); // Cleanup listener
+      window.removeEventListener('resize', handleResize); 
     };
   }, []);
 
@@ -101,7 +102,7 @@ const IncomeExpenseChart = () => {
      
 
       {/* Dropdown to select period */}
-      <div className="my-4 flex justify-center">
+      <div className="mt-32 flex justify-center">
         <select
           value={period}
           onChange={handlePeriodChange}

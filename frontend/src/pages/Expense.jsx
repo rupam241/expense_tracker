@@ -50,17 +50,17 @@ const Expense = () => {
 
       if (res.ok) {
         const data = await res.json();
-        console.log(data);
+        
         dispatch(fetchSummarySuccess(data)); // Dispatch summary success with data
-        setToastMessage(data.message);
+        
       } else {
         dispatch(fetchSummaryFailure("Failed to fetch summary details"));
-        setToastMessage("Failed to fetch summary details");
+      
       }
     } catch (error) {
       console.error(error);
       dispatch(fetchSummaryFailure("Error fetching summary details"));
-      setToastMessage("Error fetching summary details");
+      
     }
   };
 
@@ -82,7 +82,8 @@ const Expense = () => {
 
         if (res.ok) {
           const data = await res.json();
-          dispatch(fetchEntriesSuccess(data.entries)); // Dispatch success with data
+          dispatch(fetchEntriesSuccess(data.entries)); 
+          setToastMessage(data.message)// Dispatch success with data
         } else {
           dispatch(fetchEntriesFailure("Failed to fetch expense entries"));
         }
@@ -118,7 +119,7 @@ const Expense = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/api-v1/entry/update-entry/${editEntry}`,
+        `/api-v1/entry/update-entry/${editEntry}`,
         {
           method: "PUT",
           headers: {
@@ -131,10 +132,11 @@ const Expense = () => {
 
       if (res.ok) {
         const data = await res.json();
-        console.log(data);
+       
         dispatch(updateEntry({ id: editEntry, ...updatedData }));
         setEditEntry(null);
-        setFormData({ description: "", amount: "", type: "expense" }); // Reset form fields
+        setFormData({ description: "", amount: "", type: "expense" }); 
+        setToastMessage(data.message)
       } else {
         alert("Failed to update expense entry");
       }
@@ -162,7 +164,7 @@ const Expense = () => {
 
       if (res.ok) {
         dispatch(deleteEntry({ id }));
-        // Fetch updated summary after delete
+        setToastMessage("entry deleted successfully")
       } else {
         alert("Failed to delete expense entry");
       }
