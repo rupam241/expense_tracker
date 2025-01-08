@@ -39,13 +39,15 @@ const entrySlice = createSlice({
     updateEntry: (state, action) => {
       const index = state.entries.findIndex((entry) => entry.id === action.payload.id);
       if (index !== -1) {
-      
         state.entries[index] = {
-          ...state.entries[index], 
-          amount: action.payload.amount 
+          ...state.entries[index],
+          amount: action.payload.amount,
+          description: action.payload.description,
+          type: action.payload.type,
         };
       }
     },
+    
 
     deleteEntry: (state, action) => {
       const { id } = action.payload;

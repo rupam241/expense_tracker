@@ -20,14 +20,9 @@ import Toaster from "../components/Toaster";
 const Expense = () => {
   const dispatch = useDispatch();
 
-
   // Access entries, loading state, and errors from Redux store
-  const { entries, isLoading, error } = useSelector(
-    (state) => state.entrySlice
-  );
-  const { totalIncome, totalExpenses, balance } = useSelector(
-    (state) => state.summarySlice
-  );
+  const { entries, isLoading, error } = useSelector((state) => state.entrySlice);
+  const { totalIncome, totalExpenses, balance } = useSelector((state) => state.summarySlice);
 
   const [editEntry, setEditEntry] = useState(null);
   const [formData, setFormData] = useState({
@@ -37,30 +32,24 @@ const Expense = () => {
   });
   const [toastMessage, setToastMessage] = useState("");
 
+  // Fetch summary details
   const getSummaryDetails = async () => {
     try {
-      dispatch(fetchSummaryRequest()); // Dispatch the summary request to Redux
-      const res = await fetch(
-        "/api-v1/summary/get-summary",
-        {
-          method: "GET",
-          credentials: "include",
-        }
-      );
+      dispatch(fetchSummaryRequest());
+      const res = await fetch("/api-v1/summary/get-summary", {
+        method: "GET",
+        credentials: "include",
+      });
 
       if (res.ok) {
         const data = await res.json();
-        
-        dispatch(fetchSummarySuccess(data)); // Dispatch summary success with data
-        
+        dispatch(fetchSummarySuccess(data));
       } else {
         dispatch(fetchSummaryFailure("Failed to fetch summary details"));
-      
       }
     } catch (error) {
       console.error(error);
       dispatch(fetchSummaryFailure("Error fetching summary details"));
-      
     }
   };
 
@@ -68,22 +57,20 @@ const Expense = () => {
     getSummaryDetails();
   }, []);
 
+  // Fetch entries
   useEffect(() => {
     const fetchEntries = async () => {
-      dispatch(fetchEntriesRequest()); // Dispatch the request to start loading
+      dispatch(fetchEntriesRequest());
       try {
-        const res = await fetch(
-          "/api-v1/entry/get-entry?type=expense",
-          {
-            method: "GET",
-            credentials: "include",
-          }
-        );
+        const res = await fetch("/api-v1/entry/get-entry?type=expense", {
+          method: "GET",
+          credentials: "include",
+        });
 
         if (res.ok) {
           const data = await res.json();
-          dispatch(fetchEntriesSuccess(data.entries)); 
-          setToastMessage(data.message)// Dispatch success with data
+          dispatch(fetchEntriesSuccess(data.entries));
+          setToastMessage(data.message);
         } else {
           dispatch(fetchEntriesFailure("Failed to fetch expense entries"));
         }
@@ -95,48 +82,44 @@ const Expense = () => {
     fetchEntries();
   }, [dispatch]);
 
-  // Handle updating an expense entry
+ 
   const handleUpdate = async () => {
     const updatedData = {
       description: formData.description,
       amount: parseFloat(formData.amount),
       type: formData.type,
     };
+  
+    // Checking for expenses exceeding the total income
     if (updatedData.type === "expense") {
-    
       const currentExpenseAmount = entries.find((entry) => entry.id === editEntry)?.amount || 0;
-    
-      // Calculate the new total expenses after updating the entry
       const newTotalExpenses = totalExpenses - currentExpenseAmount + updatedData.amount;
-    
-    
+  
       if (newTotalExpenses > totalIncome) {
         setToastMessage(`Updated expenses cannot exceed the total income of $${totalIncome}`);
         return;
       }
     }
-    
-
+  
     try {
-      const res = await fetch(
-        `/api-v1/entry/update-entry/${editEntry}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(updatedData),
-          credentials: "include",
-        }
-      );
-
+      const res = await fetch(`/api-v1/entry/update-entry/${editEntry}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedData),
+        credentials: "include",
+      });
+  
       if (res.ok) {
         const data = await res.json();
-       
+        
+        // Dispatch updateEntry with the updated data (including description)
         dispatch(updateEntry({ id: editEntry, ...updatedData }));
+  
         setEditEntry(null);
-        setFormData({ description: "", amount: "", type: "expense" }); 
-        setToastMessage(data.message)
+        setFormData({ description: "", amount: "", type: "expense" });
+        setToastMessage(data.message);
       } else {
         alert("Failed to update expense entry");
       }
@@ -144,27 +127,22 @@ const Expense = () => {
       console.error(error);
       alert("Error updating expense entry");
     }
-    getSummaryDetails(); // Fetch updated summary after update
+  
+    getSummaryDetails();
   };
+  
 
   // Handle deleting an expense entry
   const handleDelete = async (id) => {
-
-    
-
-
     try {
-      const res = await fetch(
-        `/api-v1/entry/delete-entry/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`/api-v1/entry/delete-entry/${id}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
 
       if (res.ok) {
         dispatch(deleteEntry({ id }));
-        setToastMessage("entry deleted successfully")
+        setToastMessage("Entry deleted successfully");
       } else {
         alert("Failed to delete expense entry");
       }
@@ -172,6 +150,7 @@ const Expense = () => {
       console.error(error);
       alert("Error deleting expense entry");
     }
+
     getSummaryDetails();
   };
 
@@ -181,7 +160,6 @@ const Expense = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  
   const handleTypeChange = (e) => {
     setFormData((prev) => ({ ...prev, type: e.target.value }));
   };
@@ -194,9 +172,7 @@ const Expense = () => {
       <div className="w-full bg-white-200 shadow-md p-5 flex justify-center items-center rounded-lg">
         <div className="flex items-center gap-2">
           <span className="font-semibold">Total Expense:</span>
-          <span className="text-xl font-bold text-red-600">
-            {totalExpenses}
-          </span>
+          <span className="text-xl font-bold text-red-600">{totalExpenses}</span>
         </div>
       </div>
 
@@ -221,16 +197,11 @@ const Expense = () => {
 
                   <div className="flex items-center gap-4">
                     <SlCalender />
-                    <span>
-                      {new Date(entry.createdAt).toLocaleDateString()}
-                    </span>
+                    <span>{new Date(entry.createdAt).toLocaleDateString()}</span>
                   </div>
                 </div>
-                <p className="text-gray-600">
-                  {entry.description || "No description"}
-                </p>
+                <p className="text-gray-600">{entry.description || "No description"}</p>
 
-                {/* Update and Delete Buttons */}
                 <div className="flex gap-2">
                   <button
                     onClick={() => {
@@ -262,7 +233,6 @@ const Expense = () => {
         <span>No entries found.</span>
       )}
 
-      {/* Update Form */}
       {editEntry && (
         <div className="w-full shadow-md p-4 bg-white rounded-lg">
           <h2 className="text-lg font-semibold">Update Entry</h2>
@@ -317,9 +287,9 @@ const Expense = () => {
           </form>
         </div>
       )}
-          <Toaster message={toastMessage}/>
-    </div>
 
+      <Toaster message={toastMessage} />
+    </div>
   );
 };
 
