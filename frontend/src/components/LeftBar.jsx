@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import {
   deleteAccountFailure,
   deleteAccountStart,
@@ -15,12 +13,13 @@ import {
 const LeftBar = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
   const { currentuser, error } = useSelector((state) => state.user);
 
   const [open, setOpen] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showSignOutModal, setShowSignOutModal] = useState(false);
 
-  const handleopen = () => {
+  const handleOpen = () => {
     setOpen((prev) => !prev);
   };
 
@@ -64,93 +63,103 @@ const LeftBar = () => {
       <div className="relative flex flex-col items-center space-y-4">
         <span
           className="text-2xl font-semibold flex flex-col items-center"
-          onClick={handleopen}
+          onClick={handleOpen}
         >
           <img
             src="https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
             alt="Profile"
             className="w-20 h-20 rounded-full object-cover text-center cursor-pointer"
           />
-          <span className="font-bold text-sm cursor-pointer ">
-            See the details.Click me!
+          <span className="font-bold text-sm cursor-pointer">
+            See the details. Click me!
           </span>
         </span>
         {open && (
-          <div className="absolute top-full mt-2 w-48 bg-white  rounded-md shadow-lg overflow-hidden border-2">
+          <div className="absolute top-full mt-2 w-48 bg-white rounded-md shadow-lg overflow-hidden border-2">
             <ul className="text-gray-700">
-              <Link to="/profile"  onClick=
-              {() => {
-                setOpen(false);
-              }}>
-                {" "}
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Profile
-                </li>
+              <Link to="/profile" onClick={() => setOpen(false)}>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Profile</li>
               </Link>
-             
-              <Link
-                to="/transactions"
-                onClick={() => {
-                  setOpen(false);
-                }}
-              >
-                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
-                  Transactions
-                </li>
+              <Link to="/transactions" onClick={() => setOpen(false)}>
+                <li className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Transactions</li>
               </Link>
               <li
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                onClick={handleSignOut}
+                onClick={() => setShowSignOutModal(true)}
               >
                 Logout
               </li>
             </ul>
           </div>
         )}
-        <span className="text-sm text-gray-400">
-          Hey, it's your finance tracker
-        </span>
+        <span className="text-sm text-gray-400">Hey, it's your finance tracker</span>
       </div>
 
       <div className="flex flex-col items-center space-y-4 w-full">
-        <Link
-          to="dashboard"
-          className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300"
-        >
+        <Link to="dashboard" className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300">
           Dashboard
         </Link>
-        <Link
-          to="income"
-          className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300"
-        >
+        <Link to="income" className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300">
           Incomes
         </Link>
-        <Link
-          to="expense"
-          className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300"
-        >
+        <Link to="expense" className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300">
           Expenses
         </Link>
-        <Link
-          to="createEntry"
-          className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300"
-        >
+        <Link to="createEntry" className="w-full text-center py-2 px-4 rounded-md bg-teal-700 hover:bg-teal-600 transition-colors duration-300">
           Create Entry
         </Link>
       </div>
 
-      <button
-        className="bg-slate-400 p-3 rounded-md hover:bg-red-200"
-        onClick={handleAccountDelete}
-      >
+      <button className="bg-slate-400 p-3 rounded-md hover:bg-red-200" onClick={() => setShowDeleteModal(true)}>
         Delete Account
       </button>
-      <button
-        className="bg-slate-400 p-3 rounded-md hover:bg-red-200"
-        onClick={handleSignOut}
-      >
+      <button className="bg-slate-400 p-3 rounded-md hover:bg-red-200" onClick={() => setShowSignOutModal(true)}>
         Sign Out
       </button>
+
+      {/* Delete Account Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <h2 className="text-xl font-bold mb-4">Are you sure?</h2>
+            <p className="mb-6">This action will permanently delete your account.</p>
+            <button
+              className="bg-red-500 text-white px-4 py-2 rounded-md mr-2"
+              onClick={handleAccountDelete}
+            >
+              Confirm
+            </button>
+            <button
+              className="bg-gray-300 px-4 py-2 rounded-md"
+              onClick={() => setShowDeleteModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Sign Out Modal */}
+      {showSignOutModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow-md text-center">
+            <h2 className="text-xl font-bold mb-4">Sign Out</h2>
+            <p className="mb-6">Are you sure you want to sign out?</p>
+            <button
+              className="bg-teal-500 text-white px-4 py-2 rounded-md mr-2"
+              onClick={handleSignOut}
+            >
+              Confirm
+            </button>
+            <button
+              className="bg-gray-300 px-4 py-2 rounded-md"
+              onClick={() => setShowSignOutModal(false)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
