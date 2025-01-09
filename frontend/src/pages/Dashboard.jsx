@@ -66,19 +66,19 @@ const Dashboard = () => {
           dispatch(fetchSummarySuccess(data)); // Dispatch success action with fetched data
         } else {
           dispatch(fetchSummaryFailure());
-          setToastMessage("Failed to fetch summary!");
+          
         }
       } catch (error) {
         console.error("Error fetching summary:", error);
         dispatch(fetchSummaryFailure());
-        setToastMessage("Error fetching summary");
+        
       }
     };
 
     getSummary();
   }, [dispatch]);
 
-  // Fetch entries when the component mounts
+  
   useEffect(() => {
     getEntries();
   }, []);

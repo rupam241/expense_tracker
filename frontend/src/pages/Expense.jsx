@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SlCalender } from "react-icons/sl";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
+import { Link } from "react-router-dom";
+import { IoMdCreate } from "react-icons/io";
 import {
   fetchEntriesRequest,
   fetchEntriesSuccess,
@@ -21,8 +23,12 @@ const Expense = () => {
   const dispatch = useDispatch();
 
   // Access entries, loading state, and errors from Redux store
-  const { entries, isLoading, error } = useSelector((state) => state.entrySlice);
-  const { totalIncome, totalExpenses, balance } = useSelector((state) => state.summarySlice);
+  const { entries, isLoading, error } = useSelector(
+    (state) => state.entrySlice
+  );
+  const { totalIncome, totalExpenses, balance } = useSelector(
+    (state) => state.summarySlice
+  );
 
   const [editEntry, setEditEntry] = useState(null);
   const [formData, setFormData] = useState({
@@ -82,25 +88,28 @@ const Expense = () => {
     fetchEntries();
   }, [dispatch]);
 
- 
   const handleUpdate = async () => {
     const updatedData = {
       description: formData.description,
       amount: parseFloat(formData.amount),
       type: formData.type,
     };
-  
+
     // Checking for expenses exceeding the total income
     if (updatedData.type === "expense") {
-      const currentExpenseAmount = entries.find((entry) => entry.id === editEntry)?.amount || 0;
-      const newTotalExpenses = totalExpenses - currentExpenseAmount + updatedData.amount;
-  
+      const currentExpenseAmount =
+        entries.find((entry) => entry.id === editEntry)?.amount || 0;
+      const newTotalExpenses =
+        totalExpenses - currentExpenseAmount + updatedData.amount;
+
       if (newTotalExpenses > totalIncome) {
-        setToastMessage(`Updated expenses cannot exceed the total income of $${totalIncome}`);
+        setToastMessage(
+          `Updated expenses cannot exceed the total income of $${totalIncome}`
+        );
         return;
       }
     }
-  
+
     try {
       const res = await fetch(`/api-v1/entry/update-entry/${editEntry}`, {
         method: "PUT",
@@ -110,13 +119,12 @@ const Expense = () => {
         body: JSON.stringify(updatedData),
         credentials: "include",
       });
-  
+
       if (res.ok) {
         const data = await res.json();
-        
-        // Dispatch updateEntry with the updated data (including description)
+
         dispatch(updateEntry({ id: editEntry, ...updatedData }));
-  
+
         setEditEntry(null);
         setFormData({ description: "", amount: "", type: "expense" });
         setToastMessage(data.message);
@@ -127,12 +135,10 @@ const Expense = () => {
       console.error(error);
       alert("Error updating expense entry");
     }
-  
+
     getSummaryDetails();
   };
-  
 
-  // Handle deleting an expense entry
   const handleDelete = async (id) => {
     try {
       const res = await fetch(`/api-v1/entry/delete-entry/${id}`, {
@@ -154,7 +160,6 @@ const Expense = () => {
     getSummaryDetails();
   };
 
-  // Handle form input changes
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -172,7 +177,9 @@ const Expense = () => {
       <div className="w-full bg-white-200 shadow-md p-5 flex justify-center items-center rounded-lg">
         <div className="flex items-center gap-2">
           <span className="font-semibold">Total Expense:</span>
-          <span className="text-xl font-bold text-red-600">{totalExpenses}</span>
+          <span className="text-xl font-bold text-red-600">
+            {totalExpenses}
+          </span>
         </div>
       </div>
 
@@ -197,10 +204,14 @@ const Expense = () => {
 
                   <div className="flex items-center gap-4">
                     <SlCalender />
-                    <span>{new Date(entry.createdAt).toLocaleDateString()}</span>
+                    <span>
+                      {new Date(entry.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
-                <p className="text-gray-600">{entry.description || "No description"}</p>
+                <p className="text-gray-600">
+                  {entry.description || "No description"}
+                </p>
 
                 <div className="flex gap-2">
                   <button
@@ -230,7 +241,15 @@ const Expense = () => {
           ) : null
         )
       ) : (
-        <span>No entries found.</span>
+        <div className="flex flex-col items-center gap-4">
+          <p className=" text-lg text-gray-600">No expense to display.</p>
+          <Link to="/createEntry">
+            <div className="flex  items-center gap-1  w-48 h-12 bg-green-500 p-2 rounded-xl cursor-pointer hover:bg-gray-700">
+              <IoMdCreate />
+              <button>Create expense</button>
+            </div>
+          </Link>
+        </div>
       )}
 
       {editEntry && (

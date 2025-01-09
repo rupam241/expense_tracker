@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { SlCalender } from "react-icons/sl";
+import { Link } from "react-router-dom";
+import { IoMdCreate } from "react-icons/io";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import {
   fetchEntriesRequest,
@@ -104,11 +106,9 @@ const Income = () => {
     };
   
      if (updatedData.type === "income") {
-    // Calculate the new total income by subtracting the current income and adding the updated one
     const currentIncomeAmount = entries.find((entry) => entry.id === editEntry)?.amount || 0;
     const newTotalIncome = totalIncome - currentIncomeAmount + updatedData.amount;
 
-    // Check if the updated total income is less than total expenses
     if (newTotalIncome < totalExpenses) {
       setToastMessage(`Updated income cannot be less than the total expenses of $${totalExpenses}`);
       return;
@@ -147,7 +147,6 @@ const Income = () => {
     if (entryToDelete) {
       const newTotalIncome = totalIncome - entryToDelete.amount;
 
-      // Ensure total income after deletion does not drop below total expenses
       if (newTotalIncome < totalExpenses) {
         setToastMessage(`Total income cannot be less than total expenses of $${totalExpenses}`);
         return;
@@ -256,7 +255,15 @@ const Income = () => {
           ) : null
         )
       ) : (
-        <span>No entries found.</span>
+        <div className="flex flex-col items-center gap-4">
+        <p className=" text-lg text-gray-600">No income to display.</p>
+        <Link to="/createEntry">
+          <div className="flex  items-center gap-1  w-48 h-12 bg-green-500 p-2 rounded-xl cursor-pointer hover:bg-gray-700">
+            <IoMdCreate />
+            <button>Create income</button>
+          </div>
+        </Link>
+      </div>
       )}
 
       {/* Edit Form */}
